@@ -1,0 +1,111 @@
+<!-- public/blind-test.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Blind Test</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex flex-col items-center text-center min-h-screen w-screen px-4">
+
+  <h1 class="text-3xl md:text-5xl font-bold my-6">🎶 Devine le son</h1>
+
+  <div id="gameContainer" class="flex flex-col items-center gap-6 w-full">
+
+    <div id="vinyle" class=" animate-spin-slow">
+      <img src="./src/img/vinyl.png" alt="Vinyle" class="w-40 md:w-64 mx-auto" />
+    </div>
+
+    <audio id="player" class="hidden w-full max-w-xs mx-auto" controls></audio>
+
+    <div id="timer" class="text-gray-600 text-base"></div>
+
+    <div class="flex gap-4">
+      <button id="revealBtn" class="hidden border rounded-lg bg-green-600 p-2 text-white text-2xl font-medium">Révéler</button>
+    </div>
+
+    <div id="info" class="hidden text-center -mt-10">
+      <p class="font-bold text-lg" id="artist"></p>
+      <p id="title" class="text-gray-700"></p>
+      <p id="album" class="italic text-sm text-gray-500 mb-2"></p>
+      <img id="cover" class="mx-auto mt-2 rounded shadow w-32 md:w-40" />
+      <button id="nextSongBtn" class="border rounded-lg bg-green-600 p-2 text-white text-2xl mt-2 font-medium">Suivant</button>
+    </div>
+  </div>
+
+  <script>
+    const revealBtn = document.getElementById('revealBtn');
+    const nextSongBtn = document.getElementById('nextSongBtn');
+    const vinyle = document.getElementById('vinyle');
+    const player = document.getElementById('player');
+    const infoBox = document.getElementById('info');
+    const artistText = document.getElementById('artist');
+    const titleText = document.getElementById('title');
+    const albumText = document.getElementById('album');
+    const coverImg = document.getElementById('cover');
+    const timerDisplay = document.getElementById('timer');
+
+    let currentTrack = null;
+    let timer = null;
+    let countdown = 30;
+
+    function revealInfo() {
+      infoBox.classList.remove('hidden');
+      vinyle.classList.remove('animate-spin-slow');
+      revealBtn.classList.add('hidden');
+      clearInterval(timer);
+    }
+
+    async function loadTrack() {
+      infoBox.classList.add('hidden');
+      vinyle.classList.add('animate-spin-slow');
+      revealBtn.classList.remove('hidden');
+      player.classList.remove('hidden');
+
+      const res = await fetch(`/api/random-track?source=${new URLSearchParams(window.location.search).get("source") || "fr"}`);
+      currentTrack = await res.json();
+
+      artistText.textContent = currentTrack.artist;
+      titleText.textContent = currentTrack.title;
+      albumText.textContent = currentTrack.album;
+      coverImg.src = currentTrack.cover;
+      player.src = currentTrack.preview;
+      player.play();
+
+      countdown = 30;
+      timerDisplay.textContent = `⏳ Temps restant : ${countdown}s`;
+
+      timer = setInterval(() => {
+        countdown--;
+        timerDisplay.textContent = `⏳ Temps restant : ${countdown}s`;
+        if (countdown <= 0) {
+          clearInterval(timer);
+          revealInfo();
+        }
+      }, 1000);
+    }
+
+    revealBtn.addEventListener('click', revealInfo);
+    nextSongBtn.addEventListener('click', () => {
+      clearInterval(timer);
+      loadTrack();
+    });
+
+    // Lancer automatiquement à l’arrivée sur la page
+    window.addEventListener('DOMContentLoaded', () => {
+      loadTrack();
+    });
+  </script>
+
+  <style>
+    @keyframes spin-slow {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .animate-spin-slow {
+      animation: spin-slow 5s linear infinite;
+    }
+  </style>
+</body>
+</html>

@@ -10,6 +10,8 @@
   "description": "",
   "dependencies": {
     "@tailwindcss/cli": "^4.1.11",
+    "express": "^5.1.0",
+    "tailwind": "^4.0.0",
     "tailwindcss": "^4.1.11"
   }
 }

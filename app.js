@@ -52,7 +52,8 @@ app.get('/api/random-track', async (req, res) => {
       title: randomTrack.title,
       album: randomTrack.album.title,
       cover: randomTrack.album.cover_medium,
-      preview: randomTrack.preview
+      preview: randomTrack.preview,
+      contributors: randomTrack.contributors.name
     });
 
   } catch (err) {

@@ -67,7 +67,16 @@
       currentTrack = await res.json();
 
       artistText.textContent = currentTrack.artist;
-      titleText.textContent = currentTrack.title;
+      if (currentTrack.contributors && currentTrack.contributors.length > 1) {
+        const featured = currentTrack.contributors
+            .filter(c => c.name !== currentTrack.artist)
+            .map(c => c.name)
+            .join(', ');
+
+        titleText.textContent = `${currentTrack.title} (feat. ${featured})`;
+    } else {
+        titleText.textContent = currentTrack.title;
+    }
       albumText.textContent = currentTrack.album;
       coverImg.src = currentTrack.cover;
       player.src = currentTrack.preview;
